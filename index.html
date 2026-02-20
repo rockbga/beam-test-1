@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beam Studios — Media Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --white: #f4f1ec;
+    --accent: #c8b89a;
+    --gray: #6b6b6b;
+    --mid: #1c1c1c;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--black);
+    color: var(--white);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease;
+    transform: translate(-50%, -50%);
+  }
+
+  .cursor-ring {
+    position: fixed;
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(200, 184, 154, 0.4);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transition: transform 0.4s ease, width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Nav */
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    padding: 28px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    mix-blend-mode: normal;
+  }
+
+  nav::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(10,10,10,0.9) 0%, transparent 100%);
+    pointer-events: none;
+  }
+
+  .nav-logo {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--white);
+    text-decoration: none;
+    position: relative;
+    z-index: 1;
+  }
+
+  .nav-logo span {
+    color: var(--accent);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 40px;
+    list-style: none;
+    position: relative;
+    z-index: 1;
+  }
+
+  .nav-links a {
+    color: rgba(244,241,236,0.55);
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+    font-weight: 400;
+  }
+
+  .nav-links a:hover { color: var(--white); }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 60px 80px;
+    position: relative;
+    overflow: hidden;
+    background: var(--black);
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  /* Animated beam lines */
+  .beam-line {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, rgba(200,184,154,0.08) 30%, rgba(200,184,154,0.15) 60%, transparent);
+    transform-origin: top center;
+    animation: beamPulse 6s ease-in-out infinite;
+  }
+
+  .beam-line:nth-child(1) { left: 20%; animation-delay: 0s; }
+  .beam-line:nth-child(2) { left: 40%; animation-delay: 1.5s; opacity: 0.5; }
+  .beam-line:nth-child(3) { left: 60%; animation-delay: 3s; }
+  .beam-line:nth-child(4) { left: 80%; animation-delay: 4.5s; opacity: 0.5; }
+
+  @keyframes beamPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+  }
+
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.3s forwards;
+  }
+
+  .hero-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(52px, 8vw, 110px);
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.5s forwards;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-subtitle {
+    font-size: clamp(14px, 1.5vw, 16px);
+    line-height: 1.7;
+    color: rgba(244,241,236,0.5);
+    max-width: 560px;
+    margin-bottom: 52px;
+    font-weight: 300;
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.7s forwards;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 20px;
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.9s forwards;
+  }
+
+  .btn-primary {
+    padding: 16px 36px;
+    background: var(--white);
+    color: var(--black);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .btn-primary:hover { background: var(--accent); color: var(--black); }
+
+  .btn-ghost {
+    padding: 16px 36px;
+    border: 1px solid rgba(244,241,236,0.25);
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: border-color 0.3s, color 0.3s;
+  }
+
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 80px;
+    right: 60px;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(244,241,236,0.3);
+    writing-mode: vertical-rl;
+    opacity: 0;
+    animation: fadeIn 1s ease 1.2s forwards;
+  }
+
+  /* Section styles */
+  section {
+    padding: 120px 60px;
+  }
+
+  .section-dark { background: var(--black); }
+  .section-light {
+    background: var(--white);
+    color: var(--black);
+  }
+  .section-mid { background: var(--mid); }
+
+  /* Divider line */
+  .rule {
+    width: 60px;
+    height: 1px;
+    background: var(--accent);
+    margin-bottom: 24px;
+  }
+
+  .rule-center {
+    margin: 0 auto 24px;
+  }
+
+  /* Statement section */
+  .statement-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .statement-label {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 24px;
+  }
+
+  .section-light .statement-label { color: rgba(10,10,10,0.4); }
+
+  .statement-heading {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(34px, 4vw, 54px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+  }
+
+  .section-light .statement-heading { color: var(--black); }
+
+  .statement-heading em { font-style: italic; }
+
+  .statement-text {
+    font-size: 16px;
+    line-height: 1.8;
+    color: rgba(244,241,236,0.55);
+    font-weight: 300;
+    max-width: 480px;
+  }
+
+  .section-light .statement-text { color: rgba(10,10,10,0.55); }
+
+  .declarative-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .declarative-list li {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(24px, 3vw, 38px);
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(244,241,236,0.08);
+    color: rgba(244,241,236,0.4);
+    letter-spacing: -0.01em;
+    transition: color 0.4s, padding-left 0.4s;
+    cursor: default;
+  }
+
+  .section-light .declarative-list li {
+    border-bottom: 1px solid rgba(10,10,10,0.08);
+    color: rgba(10,10,10,0.3);
+  }
+
+  .declarative-list li:hover {
+    color: var(--white);
+    padding-left: 16px;
+  }
+
+  .section-light .declarative-list li:hover { color: var(--black); }
+
+  /* Manifesto section */
+  .manifesto {
+    max-width: 860px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .manifesto-heading {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(36px, 5vw, 70px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+
+  .manifesto-sub {
+    font-size: 15px;
+    color: rgba(244,241,236,0.4);
+    line-height: 1.8;
+    font-weight: 300;
+  }
+
+  /* Ecosystem section */
+  .ecosystem-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: rgba(10,10,10,0.15);
+    margin-top: 60px;
+  }
+
+  .eco-item {
+    background: var(--white);
+    padding: 40px 28px;
+    transition: background 0.3s;
+  }
+
+  .eco-item:hover { background: var(--black); }
+  .eco-item:hover .eco-label { color: var(--white); }
+  .eco-item:hover .eco-desc { color: rgba(244,241,236,0.5); }
+  .eco-item:hover .eco-icon { color: var(--accent); }
+
+  .eco-icon {
+    font-size: 24px;
+    margin-bottom: 16px;
+    color: var(--black);
+    transition: color 0.3s;
+  }
+
+  .eco-label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--black);
+    margin-bottom: 10px;
+    transition: color 0.3s;
+  }
+
+  .eco-desc {
+    font-size: 13px;
+    color: rgba(10,10,10,0.5);
+    line-height: 1.6;
+    font-weight: 300;
+    transition: color 0.3s;
+  }
+
+  /* Studio section */
+  .studio-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 100px;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: center;
+  }
+
+  .studio-visual {
+    position: relative;
+    height: 480px;
+    overflow: hidden;
+  }
+
+  .studio-visual-inner {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .studio-visual-inner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 60%, rgba(200,184,154,0.08) 0%, transparent 70%);
+  }
+
+  /* Beam mark SVG */
+  .beam-mark-large {
+    opacity: 0.15;
+  }
+
+  .studio-content .statement-label { margin-bottom: 32px; }
+
+  .studio-quote {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(26px, 3vw, 40px);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin-bottom: 32px;
+    color: var(--white);
+  }
+
+  .studio-quote em { font-style: italic; color: var(--accent); }
+
+  .studio-body {
+    font-size: 15px;
+    line-height: 1.9;
+    color: rgba(244,241,236,0.5);
+    font-weight: 300;
+    margin-bottom: 20px;
+  }
+
+  .studio-sig {
+    margin-top: 40px;
+    padding-top: 32px;
+    border-top: 1px solid rgba(244,241,236,0.1);
+  }
+
+  .studio-sig p {
+    font-size: 13px;
+    color: rgba(244,241,236,0.4);
+    letter-spacing: 0.04em;
+  }
+
+  .studio-sig strong {
+    display: block;
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 4px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Services */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 60px;
+    background: rgba(10,10,10,0.1);
+  }
+
+  .service-item {
+    background: var(--white);
+    padding: 48px 40px;
+    transition: background 0.4s ease;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .service-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--black);
+    transition: width 0.4s ease;
+  }
+
+  .service-item:hover::after { width: 100%; }
+  .service-item:hover { background: #ede9e1; }
+
+  .service-num {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: rgba(10,10,10,0.3);
+    margin-bottom: 24px;
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+  }
+
+  .service-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+    color: var(--black);
+    margin-bottom: 16px;
+  }
+
+  .service-desc {
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(10,10,10,0.5);
+    font-weight: 300;
+  }
+
+  /* Work section */
+  .work-intro {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 60px;
+  }
+
+  .work-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px;
+    background: rgba(244,241,236,0.05);
+  }
+
+  .work-item {
+    background: var(--mid);
+    aspect-ratio: 4/3;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .work-item-inner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .work-item-bg {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.6s ease;
+  }
+
+  .work-item:hover .work-item-bg { transform: scale(1.05); }
+
+  .work-bg-1 { background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%); }
+  .work-bg-2 { background: linear-gradient(135deg, #1f1a14 0%, #111108 100%); }
+  .work-bg-3 { background: linear-gradient(135deg, #1a1f1a 0%, #0d130d 100%); }
+
+  .work-item-content {
+    position: relative;
+    z-index: 2;
+    transform: translateY(8px);
+    transition: transform 0.4s ease;
+  }
+
+  .work-item:hover .work-item-content { transform: translateY(0); }
+
+  .work-tag {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .work-item:hover .work-tag { opacity: 1; }
+
+  .work-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+
+  .work-scope {
+    font-size: 12px;
+    color: rgba(244,241,236,0.4);
+    letter-spacing: 0.06em;
+  }
+
+  .work-item-large {
+    grid-column: span 2;
+  }
+
+  /* Perspective section */
+  .perspective-content {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .perspective-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .perspective-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 120px;
+    line-height: 0.9;
+    color: rgba(244,241,236,0.05);
+    letter-spacing: -0.05em;
+    pointer-events: none;
+  }
+
+  .perspective-text {
+    padding-top: 8px;
+  }
+
+  .perspective-heading {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(30px, 3.5vw, 50px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+
+  .perspective-heading em { font-style: italic; color: var(--accent); }
+
+  .perspective-body {
+    font-size: 15px;
+    color: rgba(244,241,236,0.5);
+    line-height: 1.8;
+    font-weight: 300;
+  }
+
+  /* CTA Section */
+  .cta-section {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: var(--black);
+    padding: 120px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(200,184,154,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cta-heading {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(42px, 6vw, 88px);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-heading em { font-style: italic; color: var(--accent); }
+
+  .cta-sub {
+    font-size: 16px;
+    color: rgba(244,241,236,0.4);
+    margin-bottom: 52px;
+    font-weight: 300;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-actions {
+    display: flex;
+    gap: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Footer */
+  footer {
+    background: var(--mid);
+    padding: 48px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(244,241,236,0.06);
+  }
+
+  .footer-logo {
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--white);
+  }
+
+  .footer-logo span { color: var(--accent); }
+
+  .footer-copy {
+    font-size: 12px;
+    color: rgba(244,241,236,0.25);
+    letter-spacing: 0.06em;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 32px;
+  }
+
+  .footer-links a {
+    font-size: 12px;
+    color: rgba(244,241,236,0.3);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+
+  .footer-links a:hover { color: var(--accent); }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Horizontal rule accent */
+  .h-rule {
+    width: 100%;
+    height: 1px;
+    background: rgba(244,241,236,0.06);
+    margin: 0;
+  }
+
+  .section-light .h-rule { background: rgba(10,10,10,0.08); }
+
+  /* Statement big text centered */
+  .center-statement {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .center-statement .statement-heading {
+    margin-bottom: 0;
+  }
+
+  /* Inline beam mark */
+  .inline-mark {
+    display: inline-block;
+    width: 18px;
+    height: 24px;
+    vertical-align: middle;
+    margin-left: 4px;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    nav, section, .hero { padding-left: 28px; padding-right: 28px; }
+    .statement-grid, .studio-layout { grid-template-columns: 1fr; gap: 48px; }
+    .services-grid, .ecosystem-grid { grid-template-columns: 1fr 1fr; }
+    .work-grid { grid-template-columns: 1fr 1fr; }
+    .work-item-large { grid-column: span 1; }
+    footer { flex-direction: column; gap: 24px; text-align: center; }
+    .perspective-row { grid-template-columns: 1fr; gap: 24px; }
+    .perspective-num { font-size: 80px; }
+    body { cursor: auto; }
+    .cursor, .cursor-ring { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Navigation -->
+<nav>
+  <a href="#" class="nav-logo">beam<span> ▲</span> studios</a>
+  <ul class="nav-links">
+    <li><a href="#work">Work</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#studio">Studio</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section class="hero section-dark">
+  <div class="hero-bg">
+    <div class="beam-line"></div>
+    <div class="beam-line"></div>
+    <div class="beam-line"></div>
+    <div class="beam-line"></div>
+  </div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Independent Publishing Studio</p>
+    <h1 class="hero-title">
+      Your podcast<br>
+      isn't content.<br>
+      It's your <em>media engine.</em>
+    </h1>
+    <p class="hero-subtitle">
+      Beam Studios builds video-first shows engineered to feed audio, YouTube, social, and owned channels — with perspective and precision.
+    </p>
+    <div class="hero-cta">
+      <a href="#work" class="btn-primary">View the Work</a>
+      <a href="#contact" class="btn-ghost">Work With Beam</a>
+    </div>
+  </div>
+  <p class="hero-scroll">Scroll</p>
+</section>
+
+<!-- Problem -->
+<section class="section-light reveal">
+  <div class="statement-grid">
+    <div>
+      <p class="statement-label">The Problem</p>
+      <div class="rule"></div>
+      <h2 class="statement-heading">Most podcasts look <em>amateur.</em></h2>
+    </div>
+    <div>
+      <ul class="declarative-list">
+        <li>Recorded without positioning.</li>
+        <li>Published without distribution.</li>
+        <li>Clipped without context.</li>
+        <li>That's why they disappear.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="h-rule"></div>
+
+<!-- Relevance -->
+<section class="section-dark reveal">
+  <div class="statement-grid">
+    <div>
+      <p class="statement-label">The Position</p>
+      <div class="rule"></div>
+      <h2 class="statement-heading">Relevance is <em>designed.</em></h2>
+      <p class="statement-text">
+        A show built correctly doesn't live in one app. It feeds everything — from first publish to long-term leverage.
+      </p>
+    </div>
+    <div>
+      <ul class="declarative-list">
+        <li>Angle before format.</li>
+        <li>Distribution before launch.</li>
+        <li>Ecosystem before episode.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Manifesto center -->
+<section class="section-light reveal" style="padding: 80px 60px;">
+  <div class="center-statement">
+    <div class="rule rule-center"></div>
+    <h2 class="statement-heading" style="font-size: clamp(30px, 4.5vw, 62px);">A podcast done right<br>should <em>feed everything.</em></h2>
+  </div>
+</section>
+
+<!-- Ecosystem grid -->
+<div class="ecosystem-grid reveal">
+  <div class="eco-item">
+    <div class="eco-icon">◎</div>
+    <div class="eco-label">Audio</div>
+    <div class="eco-desc">Anchors the show. The foundation everything builds from.</div>
+  </div>
+  <div class="eco-item">
+    <div class="eco-icon">▶</div>
+    <div class="eco-label">Video</div>
+    <div class="eco-desc">Multiplies reach. YouTube-first from day one.</div>
+  </div>
+  <div class="eco-item">
+    <div class="eco-icon">✦</div>
+    <div class="eco-label">Clips</div>
+    <div class="eco-desc">Engineered for distribution. Not afterthought.</div>
+  </div>
+  <div class="eco-item">
+    <div class="eco-icon">◈</div>
+    <div class="eco-label">Newsletters</div>
+    <div class="eco-desc">Deepens audience loyalty and builds owned channels.</div>
+  </div>
+  <div class="eco-item">
+    <div class="eco-icon">∞</div>
+    <div class="eco-label">Infrastructure</div>
+    <div class="eco-desc">The show compounds. It becomes the platform.</div>
+  </div>
+</div>
+
+<!-- Work -->
+<section class="section-dark" id="work">
+  <div class="work-intro reveal">
+    <div>
+      <p class="statement-label">Selected Work</p>
+      <div class="rule"></div>
+      <h2 class="statement-heading" style="margin-bottom: 0;">Shows we've built.</h2>
+    </div>
+    <p style="font-size: 13px; color: rgba(244,241,236,0.3); letter-spacing: 0.06em; max-width: 280px; line-height: 1.6;">
+      Projects led by the founder of Beam Studios across development, production, and growth.
+    </p>
+  </div>
+  <div class="work-grid reveal">
+    <div class="work-item work-item-large">
+      <div class="work-item-inner">
+        <div class="work-item-bg work-bg-1"></div>
+        <div class="work-item-content">
+          <p class="work-tag">Strategy · Production · Growth</p>
+          <h3 class="work-title">Cultural Conversation</h3>
+          <p class="work-scope">Multi-platform · Video-First · Distribution</p>
+        </div>
+      </div>
+    </div>
+    <div class="work-item">
+      <div class="work-item-inner">
+        <div class="work-item-bg work-bg-2"></div>
+        <div class="work-item-content">
+          <p class="work-tag">Development · Production</p>
+          <h3 class="work-title">The Founder Session</h3>
+          <p class="work-scope">Podcast · YouTube · Social</p>
+        </div>
+      </div>
+    </div>
+    <div class="work-item">
+      <div class="work-item-inner">
+        <div class="work-item-bg work-bg-3"></div>
+        <div class="work-item-content">
+          <p class="work-tag">Strategy · Clips · Growth</p>
+          <h3 class="work-title">Expert Exchange</h3>
+          <p class="work-scope">Brand · Audience · Reach</p>
+        </div>
+      </div>
+    </div>
+    <div class="work-item">
+      <div class="work-item-inner">
+        <div class="work-item-bg work-bg-1"></div>
+        <div class="work-item-content">
+          <p class="work-tag">Production · Distribution</p>
+          <h3 class="work-title">30+ Shows Built</h3>
+          <p class="work-scope">Across Industries & Formats</p>
+        </div>
+      </div>
+    </div>
+    <div class="work-item">
+      <div class="work-item-inner">
+        <div class="work-item-bg work-bg-2"></div>
+        <div class="work-item-content">
+          <p class="work-tag">Branded Content</p>
+          <h3 class="work-title">Branded Media</h3>
+          <p class="work-scope">Climate · Law · Culture</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Services -->
+<section class="section-light" id="services">
+  <div class="reveal">
+    <p class="statement-label">Studio Capabilities</p>
+    <div class="rule"></div>
+    <h2 class="statement-heading">Built like a media<br>company. <em>Not a hobby.</em></h2>
+  </div>
+  <div class="services-grid reveal">
+    <div class="service-item">
+      <p class="service-num">01</p>
+      <h3 class="service-title">Show Development</h3>
+      <p class="service-desc">Audience clarity. Format design. Category positioning. We clarify your angle before a single episode is recorded.</p>
+    </div>
+    <div class="service-item">
+      <p class="service-num">02</p>
+      <h3 class="service-title">Video-First Production</h3>
+      <p class="service-desc">Cinematic capture designed for YouTube and long-form. Platform-native editing from day one — not repurposed from audio.</p>
+    </div>
+    <div class="service-item">
+      <p class="service-num">03</p>
+      <h3 class="service-title">Growth Architecture</h3>
+      <p class="service-desc">Clip strategy. YouTube optimization. SEO. Distribution loops. We build compounding systems, not one-time releases.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Perspective / differentiator -->
+<section class="section-dark" style="padding: 100px 60px;">
+  <div class="perspective-content">
+    <div class="reveal" style="margin-bottom: 80px;">
+      <p class="statement-label">The Edge</p>
+      <div class="rule"></div>
+    </div>
+    <div class="perspective-row reveal" style="margin-bottom: 72px;">
+      <div class="perspective-num">01</div>
+      <div class="perspective-text">
+        <h3 class="perspective-heading">Native to <em>the medium.</em></h3>
+        <p class="perspective-body">Beam was founded by a producer with over a decade inside podcasting — development, editing, production, and growth. Not adjacent to the work. Inside it. That experience shapes every decision.</p>
+      </div>
+    </div>
+    <div class="h-rule" style="margin-bottom: 72px;"></div>
+    <div class="perspective-row reveal" style="margin-bottom: 72px;">
+      <div class="perspective-num">02</div>
+      <div class="perspective-text">
+        <h3 class="perspective-heading"><em>Perspective</em> determines relevance.</h3>
+        <p class="perspective-body">The edit. The pacing. The framing. The tone. Details compound. Amateur shows feel scattered. Intentional shows feel inevitable. Beam builds with perspective first.</p>
+      </div>
+    </div>
+    <div class="h-rule" style="margin-bottom: 72px;"></div>
+    <div class="perspective-row reveal">
+      <div class="perspective-num">03</div>
+      <div class="perspective-text">
+        <h3 class="perspective-heading">Culture isn't a <em>strategy.</em></h3>
+        <p class="perspective-body">Voice, nuance, and audience context matter. As a studio shaped by lived experience, Beam builds shows that resonate beyond surface-level trends. We don't chase culture. We're fluent in it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Studio / founder note -->
+<section class="section-mid" id="studio">
+  <div class="studio-layout reveal">
+    <div class="studio-visual">
+      <div class="studio-visual-inner">
+        <svg class="beam-mark-large" width="160" height="220" viewBox="0 0 160 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M80 10 L120 210 L80 195 L40 210 Z" fill="white"/>
+          <path d="M80 10 L120 210 L80 190 Z" fill="rgba(0,0,0,0.5)"/>
+        </svg>
+      </div>
+    </div>
+    <div class="studio-content">
+      <p class="statement-label">A Note from the Studio</p>
+      <div class="rule"></div>
+      <blockquote class="studio-quote">
+        "An independent <em>publishing studio</em> built from the inside out."
+      </blockquote>
+      <p class="studio-body">
+        I've spent over a decade inside podcasting — developing shows, editing episodes, building distribution systems, and studying what separates the forgettable from the inevitable.
+      </p>
+      <p class="studio-body">
+        Most podcasts don't fail loudly. They fade. Not because the idea lacked potential — but because the structure lacked intention.
+      </p>
+      <p class="studio-body">
+        Podcasting isn't just audio. It's positioning. It's platform fluency. It's understanding culture, tone, and timing. That perspective shapes Beam.
+      </p>
+      <p class="studio-body" style="font-style: italic; color: rgba(244,241,236,0.7);">
+        If we build your show, we build it correctly.
+      </p>
+      <div class="studio-sig">
+        <strong>Brian Aguilar</strong>
+        <p>Founder, Beam Studios</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="cta-section" id="contact">
+  <p class="hero-eyebrow reveal" style="margin-bottom: 20px; opacity: 1;">Ready to build signal?</p>
+  <h2 class="cta-heading reveal">Build it <em>correctly.</em></h2>
+  <p class="cta-sub reveal">Your show shouldn't look like a side project. It should look inevitable.</p>
+  <div class="cta-actions reveal">
+    <a href="mailto:hello@beamstudios.co" class="btn-primary">Start the Conversation</a>
+    <a href="#work" class="btn-ghost">See the Work</a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-logo">beam<span> ▲</span> studios</div>
+  <p class="footer-copy">© 2026 Beam Studios. All rights reserved.</p>
+  <nav class="footer-links">
+    <a href="#">Instagram</a>
+    <a href="#">LinkedIn</a>
+    <a href="#">YouTube</a>
+  </nav>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const cursorRing = document.getElementById('cursorRing');
+
+  let mouseX = 0, mouseY = 0;
+  let ringX = 0, ringY = 0;
+
+  document.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    cursor.style.left = mouseX + 'px';
+    cursor.style.top = mouseY + 'px';
+  });
+
+  function animateRing() {
+    ringX += (mouseX - ringX) * 0.12;
+    ringY += (mouseY - ringY) * 0.12;
+    cursorRing.style.left = ringX + 'px';
+    cursorRing.style.top = ringY + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // Hover effects on interactive elements
+  document.querySelectorAll('a, button, .work-item, .service-item, .eco-item, .declarative-list li').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.transform = 'translate(-50%, -50%) scale(2.5)';
+      cursorRing.style.width = '60px';
+      cursorRing.style.height = '60px';
+      cursorRing.style.borderColor = 'rgba(200,184,154,0.7)';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+      cursorRing.style.width = '36px';
+      cursorRing.style.height = '36px';
+      cursorRing.style.borderColor = 'rgba(200,184,154,0.4)';
+    });
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+
+  reveals.forEach(el => observer.observe(el));
+
+  // Nav background on scroll
+  const nav = document.querySelector('nav');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 80) {
+      nav.style.background = 'rgba(10,10,10,0.95)';
+      nav.style.backdropFilter = 'blur(12px)';
+    } else {
+      nav.style.background = '';
+      nav.style.backdropFilter = '';
+    }
+  });
+</script>
+
+</body>
+</html>
